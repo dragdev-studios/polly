@@ -270,3 +270,4 @@ Thumbs.db
 # End of https://www.toptal.com/developers/gitignore/api/python,visualstudiocode,pycharm
 .vscode
 database.sqlite3
+config.json
