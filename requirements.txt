@@ -1,5 +1,7 @@
 # Bot Library
-discord.py==1.7
+discord.py==1.7.1
+git+https://github.com/Rapptz/discord-ext-menus.git
+# ^ discord-ext-menus isn't on pypi, but it will natively be in dpy 2.0 from what I can tell.
 
 # Database
 aiosqlite>=0.17.0

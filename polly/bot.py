@@ -1,5 +1,9 @@
+import sys
 from pathlib import Path
 from json import load
+from os import getenv
+from glob import glob
+from typing import Type
 
 import discord
 from tabulate import tabulate
@@ -24,6 +28,30 @@ class PollyBot(commands.Bot):
 
         with open(self.cwd / "config.json") as cfg:
             self.config = load(cfg)
+        
+        if self.config["token"].startswith("$"):
+            # fetch env var
+            var = self.config["token"][1:]
+            self.config["token"] = getenv(var)
+            if not self.config["token"]:
+                print(Fore.RED + "No environment variable named '{}'. Unable to find bot token.".format(var))
+                sys.exit(1)
+
+        if self.config["token"] == "INSERT_TOKEN_HERE":
+            print(Fore.RED + "You need to insert a token into config.json.")
+            sys.exit(1)
+        
+        if self.config["cogs"] == "AUTO":
+            print(Fore.YELLOW + "Detecting loadable extensions...", end="\r")
+            for ext in glob(str(self.cwd / "cogs") + "/*.py"):
+                ext = ext.replace(str(self.cwd)+"/", "").replace("/", ".").strip(".py")
+                print(Fore.YELLOW + "Attempting to load " + Fore.BLUE + ext + Fore.YELLOW + "...")
+                try:
+                    self.load_extension(ext)
+                except commands.ExtensionFailed as e:
+                    print(Fore.RED + "Failed to load {}: {}".format(ext, str(e)))
+                else:
+                    print(Fore.GREEN + "Loaded {}.".format(ext))
     
     async def _init_db(self):
         self.db = await connect(self.cwd / "database.sqlite3")
@@ -78,7 +106,7 @@ class PollyBot(commands.Bot):
                 ("DMs", len(self.private_channels)),
                 ("Latency", str(round(self.latency*1000, 2)) + "ms"),
                 ("Cogs", len(self.cogs)),
-                ("Commands", len(self.walk_commands()))
+                ("Commands", len(tuple(self.walk_commands())))
             ),
             tablefmt="fancy_grid"
         )

@@ -1,4 +1,4 @@
 {
-    "token": "INSERT_TOKEN_HERE",
+    "token": "$TEST_BOT_TOKEN",
     "cogs": "AUTO"
 }
